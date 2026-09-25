@@ -539,6 +539,8 @@
   #gateerr{margin:13px 0 0;font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:11.5px;
     color:var(--loss);min-height:1.2em}
   #gatenote{margin:18px 0 0;font-size:11.5px;color:var(--muted);line-height:1.45}
+  #gatebuild{margin:6px 0 0;font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:10px;
+    letter-spacing:.1em;text-transform:uppercase;color:var(--line-2)}
 
   /* ---------- CSS-only tab state (no JavaScript anywhere on this page) ---------- */
 #t-season:checked ~ main #p-season { display: block; }
@@ -611,6 +613,7 @@
     <button id="enter" type="submit">Enter</button>
     <p id="gateerr" role="status"></p>
     <p id="gatenote">Max vs Michael &middot; 2026 NFL season</p>
+    <p id="gatebuild">build 3</p>
   </form>
   <noscript>
     <p style="max-width:340px;text-align:center;color:var(--muted)">
@@ -896,6 +899,17 @@
   function open_() { gate.hidden = true; app.hidden = false; }
 
   try { if (localStorage.getItem("dit_unlocked") === "1") open_(); } catch (e) {}
+
+  // direct link: .../football/#42069 opens without typing anything
+  function fromHash() {
+    var h = String(location.hash || "").replace(/\D/g, "");
+    if (h === PIN) {
+      try { localStorage.setItem("dit_unlocked", "1"); } catch (e4) {}
+      open_();
+    }
+  }
+  fromHash();
+  window.addEventListener("hashchange", fromHash);
 
   function tryPin(e) {
     if (e) { e.preventDefault(); e.stopPropagation(); }
