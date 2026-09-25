@@ -521,6 +521,14 @@
   }
 
   /* ---------- PIN gate ---------- */
+  .lockbtn{align-self:center;appearance:none;background:none;border:1px solid var(--line-strong);
+    border-radius:3px;color:var(--muted);font-family:"IBM Plex Mono",ui-monospace,monospace;
+    font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;
+    padding:6px 10px;margin-left:12px;cursor:pointer;white-space:nowrap}
+  .lockbtn:hover{color:var(--ink);border-color:var(--ink-2)}
+  .lockbtn:focus-visible{outline:2px solid var(--max);outline-offset:2px}
+  #gate[hidden]{display:none !important}
+  #app[hidden]{display:none !important}
   #gate{min-height:100vh;min-height:100svh;display:flex;align-items:center;justify-content:center;padding:24px}
   .gatecard{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
     padding:30px 28px 26px;max-width:340px;width:100%;text-align:center}
@@ -614,7 +622,7 @@
     <button id="enter" type="submit" disabled>Script not loaded</button>
     <p id="gateerr" role="status"></p>
     <p id="gatenote">Max vs Michael &middot; 2026 NFL season</p>
-    <p id="gatebuild">build 4</p>
+    <p id="gatebuild">build 6</p>
   </form>
   <noscript>
     <p style="max-width:340px;text-align:center;color:var(--muted)">
@@ -632,6 +640,7 @@
       <div class="idiot-name">MAX</div>
     </div>
     <div class="sub">Max vs Michael &middot; 2026 &middot; 38 picks logged</div>
+    <button type="button" id="lock" class="lockbtn">Lock</button>
   </header>
 
   <input type="radio" name="tab" id="t-season" class="tabradio" checked>
@@ -903,7 +912,13 @@
   btn.disabled = false;
   btn.textContent = "Enter";
 
-  function open_() { gate.hidden = true; app.hidden = false; }
+  function open_() {
+    gate.hidden = true;
+    gate.style.display = "none";      // beats #gate{display:flex} regardless of the cascade
+    app.hidden = false;
+    app.style.display = "";
+    try { window.scrollTo(0, 0); } catch (e5) {}
+  }
 
   try { if (localStorage.getItem("dit_unlocked") === "1") open_(); } catch (e) {}
 
@@ -925,6 +940,18 @@
 
   form.addEventListener("submit", tryPin);
   btn.addEventListener("click", tryPin);
+
+  var lock = document.getElementById("lock");
+  if (lock) {
+    lock.addEventListener("click", function () {
+      try { localStorage.removeItem("dit_unlocked"); } catch (e6) {}
+      app.hidden = true;  app.style.display  = "";
+      gate.hidden = false; gate.style.display = "";
+      pin.value = ""; err.textContent = "";
+      try { window.scrollTo(0, 0); } catch (e7) {}
+      pin.focus();
+    });
+  }
   pin.addEventListener("keydown", function (e) {
     if (e.key === "Enter" || e.keyCode === 13) tryPin(e);
   });
