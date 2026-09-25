@@ -520,6 +520,26 @@
     .idiot-name { animation: none; opacity: 1; }
   }
 
+  /* ---------- PIN gate ---------- */
+  #gate{min-height:100vh;min-height:100svh;display:flex;align-items:center;justify-content:center;padding:24px}
+  .gatecard{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+    padding:30px 28px 26px;max-width:340px;width:100%;text-align:center}
+  .gatecard h1{font-size:clamp(24px,6vw,31px);margin:0 0 6px}
+  .gatesub{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:10.5px;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--muted);margin:0 0 22px}
+  #pin{width:100%;font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:26px;font-weight:600;
+    letter-spacing:.42em;text-indent:.42em;text-align:center;padding:13px 10px;border:1px solid var(--line-strong);
+    border-radius:4px;background:var(--surface-2);color:var(--ink);-webkit-appearance:none}
+  #pin:focus{outline:2px solid var(--max);outline-offset:1px}
+  #enter{width:100%;margin-top:12px;padding:12px;border:none;border-radius:4px;background:var(--ink);
+    color:var(--surface);font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:12px;font-weight:600;
+    letter-spacing:.12em;text-transform:uppercase;cursor:pointer}
+  #enter:hover{opacity:.88}
+  #enter:focus-visible{outline:2px solid var(--max);outline-offset:2px}
+  #gateerr{margin:13px 0 0;font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:11.5px;
+    color:var(--loss);min-height:1.2em}
+  #gatenote{margin:18px 0 0;font-size:11.5px;color:var(--muted);line-height:1.45}
+
   /* ---------- CSS-only tab state (no JavaScript anywhere on this page) ---------- */
 #t-season:checked ~ main #p-season { display: block; }
 #t-season:checked ~ .tabstrip label[for="t-season"] { color: var(--ink); border-bottom-color: var(--ink); }
@@ -581,6 +601,25 @@
 </style>
 </head>
 <body>
+
+<div id="gate">
+  <form class="gatecard" id="gateform" autocomplete="off" novalidate>
+    <h1>The Dumb Idiot<br>Tracker</h1>
+    <p class="gatesub">Enter PIN</p>
+    <input id="pin" name="pin" type="text" inputmode="numeric"
+           aria-label="PIN" autocomplete="off" spellcheck="false">
+    <button id="enter" type="submit">Enter</button>
+    <p id="gateerr" role="status"></p>
+    <p id="gatenote">Max vs Michael &middot; 2026 NFL season</p>
+  </form>
+  <noscript>
+    <p style="max-width:340px;text-align:center;color:var(--muted)">
+      This page needs JavaScript enabled to open.
+    </p>
+  </noscript>
+</div>
+
+<div id="app" hidden>
 <div class="wrap">
   <header class="masthead">
     <h1>The Dumb Idiot <span class="vs">Tracker</span></h1>
@@ -843,5 +882,45 @@
     in a way spread picking does not.
   </p>
 </div>
+</div>
+
+<script>
+(function () {
+  var PIN  = "42069";
+  var gate = document.getElementById("gate");
+  var app  = document.getElementById("app");
+  var form = document.getElementById("gateform");
+  var pin  = document.getElementById("pin");
+  var err  = document.getElementById("gateerr");
+
+  function open_() { gate.hidden = true; app.hidden = false; }
+
+  try { if (localStorage.getItem("dit_unlocked") === "1") open_(); } catch (e) {}
+
+  function tryPin(e) {
+    if (e) { e.preventDefault(); e.stopPropagation(); }
+    var v = String(pin.value || "").replace(/\D/g, "");   // digits only
+    if (v === PIN) {
+      try { localStorage.setItem("dit_unlocked", "1"); } catch (e2) {}
+      err.textContent = "";
+      open_();
+    } else {
+      err.textContent = v ? "Wrong PIN" : "Enter the 5-digit PIN";
+      pin.value = "";
+      pin.focus();
+    }
+    return false;
+  }
+
+  form.addEventListener("submit", tryPin);
+  document.getElementById("enter").addEventListener("click", tryPin);
+  pin.addEventListener("keydown", function (e) {
+    if (e.key === "Enter" || e.keyCode === 13) tryPin(e);
+  });
+  pin.addEventListener("input", function () { err.textContent = ""; });
+  try { if (app.hidden) pin.focus(); } catch (e3) {}
+})();
+</script>
+
 </body>
 </html>
