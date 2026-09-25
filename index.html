@@ -531,6 +531,7 @@
     letter-spacing:.42em;text-indent:.42em;text-align:center;padding:13px 10px;border:1px solid var(--line-strong);
     border-radius:4px;background:var(--surface-2);color:var(--ink);-webkit-appearance:none}
   #pin:focus{outline:2px solid var(--max);outline-offset:1px}
+  #enter:disabled{opacity:.45;cursor:not-allowed}
   #enter{width:100%;margin-top:12px;padding:12px;border:none;border-radius:4px;background:var(--ink);
     color:var(--surface);font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:12px;font-weight:600;
     letter-spacing:.12em;text-transform:uppercase;cursor:pointer}
@@ -610,10 +611,10 @@
     <p class="gatesub">Enter PIN</p>
     <input id="pin" name="pin" type="text" inputmode="numeric"
            aria-label="PIN" autocomplete="off" spellcheck="false">
-    <button id="enter" type="submit">Enter</button>
+    <button id="enter" type="submit" disabled>Script not loaded</button>
     <p id="gateerr" role="status"></p>
     <p id="gatenote">Max vs Michael &middot; 2026 NFL season</p>
-    <p id="gatebuild">build 3</p>
+    <p id="gatebuild">build 4</p>
   </form>
   <noscript>
     <p style="max-width:340px;text-align:center;color:var(--muted)">
@@ -896,20 +897,16 @@
   var pin  = document.getElementById("pin");
   var err  = document.getElementById("gateerr");
 
+  var btn  = document.getElementById("enter");
+
+  // proof of life: if JavaScript never runs, the button stays disabled and says so
+  btn.disabled = false;
+  btn.textContent = "Enter";
+
   function open_() { gate.hidden = true; app.hidden = false; }
 
   try { if (localStorage.getItem("dit_unlocked") === "1") open_(); } catch (e) {}
 
-  // direct link: .../football/#42069 opens without typing anything
-  function fromHash() {
-    var h = String(location.hash || "").replace(/\D/g, "");
-    if (h === PIN) {
-      try { localStorage.setItem("dit_unlocked", "1"); } catch (e4) {}
-      open_();
-    }
-  }
-  fromHash();
-  window.addEventListener("hashchange", fromHash);
 
   function tryPin(e) {
     if (e) { e.preventDefault(); e.stopPropagation(); }
@@ -927,7 +924,7 @@
   }
 
   form.addEventListener("submit", tryPin);
-  document.getElementById("enter").addEventListener("click", tryPin);
+  btn.addEventListener("click", tryPin);
   pin.addEventListener("keydown", function (e) {
     if (e.key === "Enter" || e.keyCode === 13) tryPin(e);
   });
