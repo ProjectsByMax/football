@@ -1,0 +1,892 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Dumb Idiot Tracker</title>
+<meta name="description" content="Max vs Michael — 2026 NFL season pick tracker. Every pick graded against the number as written.">
+<meta name="color-scheme" content="light dark">
+<meta property="og:type" content="website">
+<meta property="og:title" content="The Dumb Idiot Tracker">
+<meta property="og:description" content="Max vs Michael — 2026 NFL season pick tracker. One of us is the dumb idiot.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>%F0%9F%8F%88</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Saira+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&family=Orbitron:wght@700;900&display=swap">
+<style>
+  :root {
+    --ground: #EFF1F3;
+    --surface: #FFFFFF;
+    --surface-2: #F6F7F9;
+    --ink: #14171C;
+    --ink-2: #454C57;
+    --muted: #737C89;
+    --line: #D8DDE3;
+    --line-strong: #BFC7D0;
+
+    --max: #B4531F;
+    --max-soft: #F5E4D9;
+    --mike: #1B6B68;
+    --mike-soft: #DCEBEA;
+
+    --win: #2C7A4B;
+    --win-soft: #DDEEE3;
+    --loss: #A73226;
+    --loss-soft: #F6DFDC;
+    --push: #6F7783;
+    --push-soft: #E6E9ED;
+
+    --radius: 4px;
+    --gutter: clamp(16px, 4vw, 40px);
+
+    color-scheme: light;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground: #121519;
+      --surface: #1A1E24;
+      --surface-2: #21262E;
+      --ink: #E9ECEF;
+      --ink-2: #B4BCC6;
+      --muted: #838C98;
+      --line: #2C323B;
+      --line-strong: #3D454F;
+
+      --max: #E08A4E;
+      --max-soft: #3A2515;
+      --mike: #4FB3AE;
+      --mike-soft: #12332F;
+
+      --win: #5CBB84;
+      --win-soft: #16301F;
+      --loss: #E0705F;
+      --loss-soft: #351A16;
+      --push: #8B94A0;
+      --push-soft: #262B33;
+
+      color-scheme: dark;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --ground: #121519;
+    --surface: #1A1E24;
+    --surface-2: #21262E;
+    --ink: #E9ECEF;
+    --ink-2: #B4BCC6;
+    --muted: #838C98;
+    --line: #2C323B;
+    --line-strong: #3D454F;
+
+    --max: #E08A4E;
+    --max-soft: #3A2515;
+    --mike: #4FB3AE;
+    --mike-soft: #12332F;
+
+    --win: #5CBB84;
+    --win-soft: #16301F;
+    --loss: #E0705F;
+    --loss-soft: #351A16;
+    --push: #8B94A0;
+    --push-soft: #262B33;
+
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--ink);
+    font-family: "IBM Plex Sans", ui-sans-serif, system-ui, -apple-system, sans-serif;
+    font-size: 15px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding-inline: var(--gutter);
+    padding-block: clamp(24px, 5vw, 48px) 64px;
+  }
+
+  /* ---------- masthead ---------- */
+
+  .masthead {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 8px 16px;
+    padding-bottom: 16px;
+    border-bottom: 2px solid var(--ink);
+  }
+
+  h1 {
+    font-family: "Saira Condensed", "Arial Narrow", sans-serif;
+    font-weight: 700;
+    font-size: clamp(34px, 7vw, 52px);
+    line-height: 0.95;
+    letter-spacing: -0.005em;
+    margin: 0;
+    text-wrap: balance;
+    text-transform: uppercase;
+  }
+
+  h1 .vs {
+    color: var(--muted);
+    font-weight: 500;
+  }
+
+  .masthead .sub {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-left: auto;
+  }
+
+  /* ---------- current dumb idiot readout ---------- */
+
+  .idiot {
+    align-self: center;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    background: #08090B;
+    border: 1px solid #23262C;
+    border-radius: 3px;
+    padding: 8px 14px 9px;
+    box-shadow: inset 0 1px 5px rgba(0, 0, 0, 0.7);
+  }
+
+  .idiot-label {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 8.5px;
+    font-weight: 600;
+    letter-spacing: 0.17em;
+    text-transform: uppercase;
+    color: #7A4A44;
+    line-height: 1;
+  }
+
+  .idiot-name {
+    font-family: "Orbitron", "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 20px;
+    font-weight: 900;
+    letter-spacing: 0.12em;
+    line-height: 1;
+    color: #FF3B27;
+    text-shadow:
+      0 0 5px rgba(255, 59, 39, 0.9),
+      0 0 16px rgba(255, 59, 39, 0.5);
+    animation: idiotBlink 4s steps(1, end) infinite;
+  }
+
+  @keyframes idiotBlink {
+    0%, 75%      { opacity: 1; }   /* lit for 3s of the 4s cycle */
+    75.01%, 100% { opacity: 0.12; } /* dark for 1s */
+  }
+
+  /* ---------- tabs ---------- */
+
+  .tabstrip {
+    display: flex;
+    gap: 0;
+    overflow-x: auto;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 32px;
+    scrollbar-width: thin;
+  }
+
+  .tab {
+    flex: 0 0 auto;
+    appearance: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    background: none;
+    color: var(--muted);
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 14px 13px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: color 120ms ease, border-color 120ms ease;
+  }
+
+  .tab:hover { color: var(--ink-2); }
+
+  .tabradio {
+    position: absolute;
+    width: 1px; height: 1px;
+    margin: -1px; padding: 0;
+    overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%);
+    white-space: nowrap; border: 0;
+  }
+
+  .tab { user-select: none; }
+
+  .panel { display: none; }
+
+  .tab.season { font-weight: 600; }
+
+  .tab.empty { opacity: 0.45; }
+
+  /* ---------- season: headline records ---------- */
+
+  .standings {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+
+  .player {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-top: 3px solid var(--accent);
+    border-radius: var(--radius);
+    padding: 20px;
+  }
+
+  .player.p-max { --accent: var(--max); }
+  .player.p-mike { --accent: var(--mike); }
+
+  .player .name {
+    font-family: "Saira Condensed", "Arial Narrow", sans-serif;
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 10px;
+  }
+
+  .player .figs {
+    display: grid;
+    grid-template-columns: auto auto;
+    gap: 10px 28px;
+    justify-content: start;
+    align-items: end;
+  }
+
+  .player .fig-val {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: clamp(28px, 5.5vw, 40px);
+    font-weight: 600;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .player .fig-val.pct { color: var(--accent); }
+  .player .fig-val.none { color: var(--muted); font-weight: 500; }
+
+  .player .fig-key {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.11em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-top: 7px;
+  }
+
+  .player .caption {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 11.5px;
+    color: var(--muted);
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid var(--line);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ---------- breakdown ---------- */
+
+  .section-label {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0 0 12px;
+  }
+
+  .tablewrap {
+    overflow-x: auto;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    margin-bottom: 32px;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+  }
+
+  th, td {
+    text-align: left;
+    padding: 11px 16px;
+    border-bottom: 1px solid var(--line);
+    white-space: nowrap;
+  }
+
+  thead th {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    background: var(--surface-2);
+    border-bottom: 1px solid var(--line-strong);
+  }
+
+  tbody tr:last-child td { border-bottom: none; }
+
+  td.num, th.num {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+  }
+
+  td.cat {
+    font-weight: 500;
+  }
+
+  td.dim { color: var(--muted); }
+
+  .who {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-weight: 500;
+  }
+
+  .who::before {
+    content: "";
+    width: 3px;
+    height: 14px;
+    background: var(--accent);
+    border-radius: 1px;
+  }
+
+  .who.p-max { --accent: var(--max); }
+  .who.p-mike { --accent: var(--mike); }
+
+  /* ---------- week grid on season page ---------- */
+
+  .weekgrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
+    gap: 8px;
+  }
+
+  .wkcell {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 9px 10px;
+  }
+
+  .wkcell.blank { background: none; border-style: dashed; }
+
+  .wkcell .wk {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 5px;
+  }
+
+  .wkcell .line {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 12.5px;
+    font-variant-numeric: tabular-nums;
+    display: flex;
+    justify-content: space-between;
+    gap: 6px;
+  }
+
+  .wkcell .line .v { color: var(--ink-2); }
+  .wkcell .line.p-max .k { color: var(--max); }
+  .wkcell .line.p-mike .k { color: var(--mike); }
+  .wkcell .line .k { font-weight: 600; }
+  .wkcell.blank .line { color: var(--muted); }
+
+  /* ---------- week panels ---------- */
+
+  .pickblock { margin-bottom: 28px; }
+
+  .pickblock h3 {
+    font-family: "Saira Condensed", "Arial Narrow", sans-serif;
+    font-size: 19px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    margin: 0 0 12px;
+    color: var(--accent);
+  }
+
+  .pickblock.p-max { --accent: var(--max); }
+  .pickblock.p-mike { --accent: var(--mike); }
+
+  .pickblock h3 .tally {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--muted);
+    letter-spacing: 0.04em;
+    margin-left: 8px;
+  }
+
+  td.pick {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .type {
+    display: inline-block;
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    padding: 2px 6px;
+    border: 1px solid var(--line-strong);
+    border-radius: 2px;
+    color: var(--muted);
+  }
+
+  .badge {
+    display: inline-block;
+    min-width: 26px;
+    text-align: center;
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    padding: 3px 8px;
+    border-radius: 2px;
+  }
+
+  .badge.w { background: var(--win-soft); color: var(--win); }
+  .badge.l { background: var(--loss-soft); color: var(--loss); }
+  .badge.p { background: var(--push-soft); color: var(--push); }
+  .badge.pending {
+    background: none;
+    color: var(--muted);
+    border: 1px dashed var(--line-strong);
+  }
+
+  .empty-note {
+    background: var(--surface);
+    border: 1px dashed var(--line-strong);
+    border-radius: var(--radius);
+    padding: 28px 20px;
+    text-align: center;
+    color: var(--muted);
+    font-size: 14px;
+  }
+
+  .footnote {
+    margin-top: 32px;
+    padding-top: 16px;
+    border-top: 1px solid var(--line);
+    color: var(--muted);
+    font-size: 12.5px;
+    max-width: 62ch;
+  }
+
+  .footnote strong { color: var(--ink-2); font-weight: 600; }
+
+  @media (max-width: 560px) {
+    .standings { grid-template-columns: 1fr; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; }
+    .idiot-name { animation: none; opacity: 1; }
+  }
+
+  /* ---------- PIN gate ---------- */
+  .lockbtn{align-self:center;appearance:none;background:none;border:1px solid var(--line-strong);
+    border-radius:3px;color:var(--muted);font-family:"IBM Plex Mono",ui-monospace,monospace;
+    font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;
+    padding:6px 10px;margin-left:12px;cursor:pointer;white-space:nowrap}
+  .lockbtn:hover{color:var(--ink);border-color:var(--ink-2)}
+  .lockbtn:focus-visible{outline:2px solid var(--max);outline-offset:2px}
+  #gate[hidden]{display:none !important}
+  #app[hidden]{display:none !important}
+  #gate{min-height:100vh;min-height:100svh;display:flex;align-items:center;justify-content:center;padding:24px}
+  .gatecard{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+    padding:30px 28px 26px;max-width:340px;width:100%;text-align:center}
+  .gatecard h1{font-size:clamp(24px,6vw,31px);margin:0 0 6px}
+  .gatesub{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:10.5px;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--muted);margin:0 0 22px}
+  #pin{width:100%;font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:26px;font-weight:600;
+    letter-spacing:.42em;text-indent:.42em;text-align:center;padding:13px 10px;border:1px solid var(--line-strong);
+    border-radius:4px;background:var(--surface-2);color:var(--ink);-webkit-appearance:none}
+  #pin:focus{outline:2px solid var(--max);outline-offset:1px}
+  #enter:disabled{opacity:.45;cursor:not-allowed}
+  #enter{width:100%;margin-top:12px;padding:12px;border:none;border-radius:4px;background:var(--ink);
+    color:var(--surface);font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:12px;font-weight:600;
+    letter-spacing:.12em;text-transform:uppercase;cursor:pointer}
+  #enter:hover{opacity:.88}
+  #enter:focus-visible{outline:2px solid var(--max);outline-offset:2px}
+  #gateerr{margin:13px 0 0;font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:11.5px;
+    color:var(--loss);min-height:1.2em}
+  #gatenote{margin:18px 0 0;font-size:11.5px;color:var(--muted);line-height:1.45}
+  #gatebuild{margin:6px 0 0;font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:10px;
+    letter-spacing:.1em;text-transform:uppercase;color:var(--line-2)}
+
+  /* ---------- CSS-only tab state (no JavaScript anywhere on this page) ---------- */
+#t-season:checked ~ main #p-season { display: block; }
+#t-season:checked ~ .tabstrip label[for="t-season"] { color: var(--ink); border-bottom-color: var(--ink); }
+#t-season:focus-visible ~ .tabstrip label[for="t-season"] { outline: 2px solid var(--max); outline-offset: -2px; }
+#t-wk1:checked ~ main #p-wk1 { display: block; }
+#t-wk1:checked ~ .tabstrip label[for="t-wk1"] { color: var(--ink); border-bottom-color: var(--ink); }
+#t-wk1:focus-visible ~ .tabstrip label[for="t-wk1"] { outline: 2px solid var(--max); outline-offset: -2px; }
+#t-wk2:checked ~ main #p-wk2 { display: block; }
+#t-wk2:checked ~ .tabstrip label[for="t-wk2"] { color: var(--ink); border-bottom-color: var(--ink); }
+#t-wk2:focus-visible ~ .tabstrip label[for="t-wk2"] { outline: 2px solid var(--max); outline-offset: -2px; }
+#t-wk3:checked ~ main #p-wk3 { display: block; }
+#t-wk3:checked ~ .tabstrip label[for="t-wk3"] { color: var(--ink); border-bottom-color: var(--ink); }
+#t-wk3:focus-visible ~ .tabstrip label[for="t-wk3"] { outline: 2px solid var(--max); outline-offset: -2px; }
+#t-wk4:checked ~ main #p-wk4 { display: block; }
+#t-wk4:checked ~ .tabstrip label[for="t-wk4"] { color: var(--ink); border-bottom-color: var(--ink); }
+#t-wk4:focus-visible ~ .tabstrip label[for="t-wk4"] { outline: 2px solid var(--max); outline-offset: -2px; }
+#t-wk5:checked ~ main #p-wk5 { display: block; }
+#t-wk5:checked ~ .tabstrip label[for="t-wk5"] { color: var(--ink); border-bottom-color: var(--ink); }
+#t-wk5:focus-visible ~ .tabstrip label[for="t-wk5"] { outline: 2px solid var(--max); outline-offset: -2px; }
+#t-wk6:checked ~ main #p-wk6 { display: block; }
+#t-wk6:checked ~ .tabstrip label[for="t-wk6"] { color: var(--ink); border-bottom-color: var(--ink); }
+#t-wk6:focus-visible ~ .tabstrip label[for="t-wk6"] { outline: 2px solid var(--max); outline-offset: -2px; }
+#t-wk7:checked ~ main #p-wk7 { display: block; }
+#t-wk7:checked ~ .tabstrip label[for="t-wk7"] { color: var(--ink); border-bottom-color: var(--ink); }
+#t-wk7:focus-visible ~ .tabstrip label[for="t-wk7"] { outline: 2px solid var(--max); outline-offset: -2px; }
+#t-wk8:checked ~ main #p-wk8 { display: block; }
+#t-wk8:checked ~ .tabstrip label[for="t-wk8"] { color: var(--ink); border-bottom-color: var(--ink); }
+#t-wk8:focus-visible ~ .tabstrip label[for="t-wk8"] { outline: 2px solid var(--max); outline-offset: -2px; }
+#t-wk9:checked ~ main #p-wk9 { display: block; }
+#t-wk9:checked ~ .tabstrip label[for="t-wk9"] { color: var(--ink); border-bottom-color: var(--ink); }
+#t-wk9:focus-visible ~ .tabstrip label[for="t-wk9"] { outline: 2px solid var(--max); outline-offset: -2px; }
+#t-wk10:checked ~ main #p-wk10 { display: block; }
+#t-wk10:checked ~ .tabstrip label[for="t-wk10"] { color: var(--ink); border-bottom-color: var(--ink); }
+#t-wk10:focus-visible ~ .tabstrip label[for="t-wk10"] { outline: 2px solid var(--max); outline-offset: -2px; }
+#t-wk11:checked ~ main #p-wk11 { display: block; }
+#t-wk11:checked ~ .tabstrip label[for="t-wk11"] { color: var(--ink); border-bottom-color: var(--ink); }
+#t-wk11:focus-visible ~ .tabstrip label[for="t-wk11"] { outline: 2px solid var(--max); outline-offset: -2px; }
+#t-wk12:checked ~ main #p-wk12 { display: block; }
+#t-wk12:checked ~ .tabstrip label[for="t-wk12"] { color: var(--ink); border-bottom-color: var(--ink); }
+#t-wk12:focus-visible ~ .tabstrip label[for="t-wk12"] { outline: 2px solid var(--max); outline-offset: -2px; }
+#t-wk13:checked ~ main #p-wk13 { display: block; }
+#t-wk13:checked ~ .tabstrip label[for="t-wk13"] { color: var(--ink); border-bottom-color: var(--ink); }
+#t-wk13:focus-visible ~ .tabstrip label[for="t-wk13"] { outline: 2px solid var(--max); outline-offset: -2px; }
+#t-wk14:checked ~ main #p-wk14 { display: block; }
+#t-wk14:checked ~ .tabstrip label[for="t-wk14"] { color: var(--ink); border-bottom-color: var(--ink); }
+#t-wk14:focus-visible ~ .tabstrip label[for="t-wk14"] { outline: 2px solid var(--max); outline-offset: -2px; }
+#t-wk15:checked ~ main #p-wk15 { display: block; }
+#t-wk15:checked ~ .tabstrip label[for="t-wk15"] { color: var(--ink); border-bottom-color: var(--ink); }
+#t-wk15:focus-visible ~ .tabstrip label[for="t-wk15"] { outline: 2px solid var(--max); outline-offset: -2px; }
+#t-wk16:checked ~ main #p-wk16 { display: block; }
+#t-wk16:checked ~ .tabstrip label[for="t-wk16"] { color: var(--ink); border-bottom-color: var(--ink); }
+#t-wk16:focus-visible ~ .tabstrip label[for="t-wk16"] { outline: 2px solid var(--max); outline-offset: -2px; }
+#t-wk17:checked ~ main #p-wk17 { display: block; }
+#t-wk17:checked ~ .tabstrip label[for="t-wk17"] { color: var(--ink); border-bottom-color: var(--ink); }
+#t-wk17:focus-visible ~ .tabstrip label[for="t-wk17"] { outline: 2px solid var(--max); outline-offset: -2px; }
+#t-wk18:checked ~ main #p-wk18 { display: block; }
+#t-wk18:checked ~ .tabstrip label[for="t-wk18"] { color: var(--ink); border-bottom-color: var(--ink); }
+#t-wk18:focus-visible ~ .tabstrip label[for="t-wk18"] { outline: 2px solid var(--max); outline-offset: -2px; }
+</style>
+</head>
+<body>
+
+
+<div class="wrap">
+  <header class="masthead">
+    <h1>The Dumb Idiot <span class="vs">Tracker</span></h1>
+    <div class="idiot">
+      <div class="idiot-label">Current Dumb Idiot</div>
+      <div class="idiot-name">MAX</div>
+    </div>
+    <div class="sub">Max vs Michael &middot; 2026 &middot; 38 picks logged</div>
+    <a href="index.html" id="lock" class="lockbtn">Lock</a>
+  </header>
+
+  <input type="radio" name="tab" id="t-season" class="tabradio" checked>
+  <input type="radio" name="tab" id="t-wk1" class="tabradio">
+  <input type="radio" name="tab" id="t-wk2" class="tabradio">
+  <input type="radio" name="tab" id="t-wk3" class="tabradio">
+  <input type="radio" name="tab" id="t-wk4" class="tabradio">
+  <input type="radio" name="tab" id="t-wk5" class="tabradio">
+  <input type="radio" name="tab" id="t-wk6" class="tabradio">
+  <input type="radio" name="tab" id="t-wk7" class="tabradio">
+  <input type="radio" name="tab" id="t-wk8" class="tabradio">
+  <input type="radio" name="tab" id="t-wk9" class="tabradio">
+  <input type="radio" name="tab" id="t-wk10" class="tabradio">
+  <input type="radio" name="tab" id="t-wk11" class="tabradio">
+  <input type="radio" name="tab" id="t-wk12" class="tabradio">
+  <input type="radio" name="tab" id="t-wk13" class="tabradio">
+  <input type="radio" name="tab" id="t-wk14" class="tabradio">
+  <input type="radio" name="tab" id="t-wk15" class="tabradio">
+  <input type="radio" name="tab" id="t-wk16" class="tabradio">
+  <input type="radio" name="tab" id="t-wk17" class="tabradio">
+  <input type="radio" name="tab" id="t-wk18" class="tabradio">
+
+  <div class="tabstrip">
+    <label class="tab season" for="t-season">Season</label>
+    <label class="tab " for="t-wk1">Wk 1</label>
+    <label class="tab " for="t-wk2">Wk 2</label>
+    <label class="tab " for="t-wk3">Wk 3</label>
+    <label class="tab empty" for="t-wk4">Wk 4</label>
+    <label class="tab empty" for="t-wk5">Wk 5</label>
+    <label class="tab empty" for="t-wk6">Wk 6</label>
+    <label class="tab empty" for="t-wk7">Wk 7</label>
+    <label class="tab empty" for="t-wk8">Wk 8</label>
+    <label class="tab empty" for="t-wk9">Wk 9</label>
+    <label class="tab empty" for="t-wk10">Wk 10</label>
+    <label class="tab empty" for="t-wk11">Wk 11</label>
+    <label class="tab empty" for="t-wk12">Wk 12</label>
+    <label class="tab empty" for="t-wk13">Wk 13</label>
+    <label class="tab empty" for="t-wk14">Wk 14</label>
+    <label class="tab empty" for="t-wk15">Wk 15</label>
+    <label class="tab empty" for="t-wk16">Wk 16</label>
+    <label class="tab empty" for="t-wk17">Wk 17</label>
+    <label class="tab empty" for="t-wk18">Wk 18</label>
+  </div>
+
+  <main>
+<section class="panel" id="p-season">
+<div class="standings">
+<div class="player p-max">
+  <div class="name">Max</div>
+  <div class="figs">
+    <div><div class="fig-val">8-9-3</div><div class="fig-key">Record</div></div>
+    <div><div class="fig-val pct">47.1%</div><div class="fig-key">Correct</div></div>
+  </div>
+  <div class="caption">17 graded &middot; 3 pushes &middot; 10 pending</div>
+</div>
+<div class="player p-mike">
+  <div class="name">Michael</div>
+  <div class="figs">
+    <div><div class="fig-val">4-4</div><div class="fig-key">Record</div></div>
+    <div><div class="fig-val pct">50.0%</div><div class="fig-key">Correct</div></div>
+  </div>
+  <div class="caption">8 graded &middot; 0 pushes &middot; 0 pending</div>
+</div>
+</div>
+<p class="section-label">By pick type</p>
+<div class="tablewrap"><table><thead><tr><th>Player</th><th>Type</th><th class="num">W</th><th class="num">L</th><th class="num">Push</th><th class="num">Record</th><th class="num">Pct</th></tr></thead><tbody>
+<tr><td><span class="who p-max">Max</span></td><td class="cat">Against the spread</td><td class="num">7</td><td class="num">8</td><td class="num">2</td><td class="num">7-8-2</td><td class="num">46.7%</td></tr>
+<tr><td></td><td class="cat">Money line</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0-0</td><td class="num dim">&mdash;</td></tr>
+<tr><td></td><td class="cat">Totals</td><td class="num">1</td><td class="num">1</td><td class="num">1</td><td class="num">1-1-1</td><td class="num">50.0%</td></tr>
+<tr><td><span class="who p-mike">Michael</span></td><td class="cat">Against the spread</td><td class="num">3</td><td class="num">3</td><td class="num">0</td><td class="num">3-3</td><td class="num">50.0%</td></tr>
+<tr><td></td><td class="cat">Money line</td><td class="num">1</td><td class="num">1</td><td class="num">0</td><td class="num">1-1</td><td class="num">50.0%</td></tr>
+<tr><td></td><td class="cat">Totals</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0-0</td><td class="num dim">&mdash;</td></tr>
+</tbody></table></div>
+<p class="section-label">Week by week</p><div class="weekgrid">
+<div class="wkcell"><div class="wk">Week 1</div>
+<div class="line p-max"><span class="k">MAX</span><span class="v">3-3-2</span></div>
+<div class="line p-mike"><span class="k">MIK</span><span class="v">0-4</span></div>
+</div>
+<div class="wkcell"><div class="wk">Week 2</div>
+<div class="line p-max"><span class="k">MAX</span><span class="v">5-6-1</span></div>
+<div class="line p-mike"><span class="k">MIK</span><span class="v">4-0</span></div>
+</div>
+<div class="wkcell"><div class="wk">Week 3</div>
+<div class="line p-max"><span class="k">MAX</span><span class="v">&middot;&middot;&middot;</span></div>
+<div class="line p-mike"><span class="k">MIK</span><span class="v">&mdash;</span></div>
+</div>
+<div class="wkcell blank"><div class="wk">Week 4</div>
+<div class="line">&mdash;</div>
+</div>
+<div class="wkcell blank"><div class="wk">Week 5</div>
+<div class="line">&mdash;</div>
+</div>
+<div class="wkcell blank"><div class="wk">Week 6</div>
+<div class="line">&mdash;</div>
+</div>
+<div class="wkcell blank"><div class="wk">Week 7</div>
+<div class="line">&mdash;</div>
+</div>
+<div class="wkcell blank"><div class="wk">Week 8</div>
+<div class="line">&mdash;</div>
+</div>
+<div class="wkcell blank"><div class="wk">Week 9</div>
+<div class="line">&mdash;</div>
+</div>
+<div class="wkcell blank"><div class="wk">Week 10</div>
+<div class="line">&mdash;</div>
+</div>
+<div class="wkcell blank"><div class="wk">Week 11</div>
+<div class="line">&mdash;</div>
+</div>
+<div class="wkcell blank"><div class="wk">Week 12</div>
+<div class="line">&mdash;</div>
+</div>
+<div class="wkcell blank"><div class="wk">Week 13</div>
+<div class="line">&mdash;</div>
+</div>
+<div class="wkcell blank"><div class="wk">Week 14</div>
+<div class="line">&mdash;</div>
+</div>
+<div class="wkcell blank"><div class="wk">Week 15</div>
+<div class="line">&mdash;</div>
+</div>
+<div class="wkcell blank"><div class="wk">Week 16</div>
+<div class="line">&mdash;</div>
+</div>
+<div class="wkcell blank"><div class="wk">Week 17</div>
+<div class="line">&mdash;</div>
+</div>
+<div class="wkcell blank"><div class="wk">Week 18</div>
+<div class="line">&mdash;</div>
+</div>
+</div>
+</section>
+<section class="panel" id="p-wk1">
+<div class="pickblock p-max"><h3>Max <span class="tally">3-3-2 &middot; 8 picks</span></h3>
+<div class="tablewrap"><table><thead><tr><th>Game</th><th>Pick</th><th>Type</th><th>Result</th></tr></thead><tbody>
+<tr><td>Patriots @ Seahawks</td><td class="pick">Patriots +3</td><td><span class="type">ATS</span></td><td><span class="badge p">PUSH</span></td></tr>
+<tr><td>49ers @ Rams</td><td class="pick">Rams -3.5</td><td><span class="type">ATS</span></td><td><span class="badge l">L</span></td></tr>
+<tr><td>Falcons @ Steelers</td><td class="pick">Steelers -5.5</td><td><span class="type">ATS</span></td><td><span class="badge w">W</span></td></tr>
+<tr><td>Bills @ Texans</td><td class="pick">Bills -1.5</td><td><span class="type">ATS</span></td><td><span class="badge w">W</span></td></tr>
+<tr><td>Buccaneers @ Bengals</td><td class="pick">Under 50</td><td><span class="type">TOTAL</span></td><td><span class="badge l">L</span></td></tr>
+<tr><td>Packers @ Vikings</td><td class="pick">Packers +2</td><td><span class="type">ATS</span></td><td><span class="badge l">L</span></td></tr>
+<tr><td>Dolphins @ Raiders</td><td class="pick">Raiders -3</td><td><span class="type">ATS</span></td><td><span class="badge w">W</span></td></tr>
+<tr><td>Cowboys @ Giants</td><td class="pick">Under 48</td><td><span class="type">TOTAL</span></td><td><span class="badge p">PUSH</span></td></tr>
+</tbody></table></div>
+</div>
+<div class="pickblock p-mike"><h3>Michael <span class="tally">0-4 &middot; 4 picks</span></h3>
+<div class="tablewrap"><table><thead><tr><th>Game</th><th>Pick</th><th>Type</th><th>Result</th></tr></thead><tbody>
+<tr><td>Falcons @ Steelers</td><td class="pick">Falcons +6.5</td><td><span class="type">ATS</span></td><td><span class="badge l">L</span></td></tr>
+<tr><td>Buccaneers @ Bengals</td><td class="pick">Buccaneers ML</td><td><span class="type">ML</span></td><td><span class="badge l">L</span></td></tr>
+<tr><td>Packers @ Vikings</td><td class="pick">Packers +2</td><td><span class="type">ATS</span></td><td><span class="badge l">L</span></td></tr>
+<tr><td>Commanders @ Eagles</td><td class="pick">Eagles -5.5</td><td><span class="type">ATS</span></td><td><span class="badge l">L</span></td></tr>
+</tbody></table></div>
+</div>
+</section>
+<section class="panel" id="p-wk2">
+<div class="pickblock p-max"><h3>Max <span class="tally">5-6-1 &middot; 12 picks</span></h3>
+<div class="tablewrap"><table><thead><tr><th>Game</th><th>Pick</th><th>Type</th><th>Result</th></tr></thead><tbody>
+<tr><td>Browns @ Buccaneers</td><td class="pick">Browns +8</td><td><span class="type">ATS</span></td><td><span class="badge w">W</span></td></tr>
+<tr><td>Packers @ Jets</td><td class="pick">Jets +3</td><td><span class="type">ATS</span></td><td><span class="badge p">PUSH</span></td></tr>
+<tr><td>Vikings @ Bears</td><td class="pick">Bears -4</td><td><span class="type">ATS</span></td><td><span class="badge l">L</span></td></tr>
+<tr><td>Saints @ Ravens</td><td class="pick">Saints +8</td><td><span class="type">ATS</span></td><td><span class="badge w">W</span></td></tr>
+<tr><td>Eagles @ Titans</td><td class="pick">Over 39.5</td><td><span class="type">TOTAL</span></td><td><span class="badge w">W</span></td></tr>
+<tr><td>Steelers @ Patriots</td><td class="pick">Steelers +5</td><td><span class="type">ATS</span></td><td><span class="badge l">L</span></td></tr>
+<tr><td>Jaguars @ Broncos</td><td class="pick">Jaguars +3</td><td><span class="type">ATS</span></td><td><span class="badge l">L</span></td></tr>
+<tr><td>Dolphins @ 49ers</td><td class="pick">Dolphins +13</td><td><span class="type">ATS</span></td><td><span class="badge l">L</span></td></tr>
+<tr><td>Seahawks @ Cardinals</td><td class="pick">Seahawks -3.5</td><td><span class="type">ATS</span></td><td><span class="badge w">W</span></td></tr>
+<tr><td>Commanders @ Cowboys</td><td class="pick">Cowboys -4</td><td><span class="type">ATS</span></td><td><span class="badge w">W</span></td></tr>
+<tr><td>Colts @ Chiefs</td><td class="pick">Chiefs -6.5</td><td><span class="type">ATS</span></td><td><span class="badge l">L</span></td></tr>
+<tr><td>Giants @ Rams</td><td class="pick">Giants +7</td><td><span class="type">ATS</span></td><td><span class="badge l">L</span></td></tr>
+</tbody></table></div>
+</div>
+<div class="pickblock p-mike"><h3>Michael <span class="tally">4-0 &middot; 4 picks</span></h3>
+<div class="tablewrap"><table><thead><tr><th>Game</th><th>Pick</th><th>Type</th><th>Result</th></tr></thead><tbody>
+<tr><td>Panthers @ Falcons</td><td class="pick">Panthers -2.5</td><td><span class="type">ATS</span></td><td><span class="badge w">W</span></td></tr>
+<tr><td>Bengals @ Texans</td><td class="pick">Bengals ML +130</td><td><span class="type">ML</span></td><td><span class="badge w">W</span></td></tr>
+<tr><td>Vikings @ Bears</td><td class="pick">Vikings +4</td><td><span class="type">ATS</span></td><td><span class="badge w">W</span></td></tr>
+<tr><td>Seahawks @ Cardinals</td><td class="pick">Seahawks -4</td><td><span class="type">ATS</span></td><td><span class="badge w">W</span></td></tr>
+</tbody></table></div>
+</div>
+</section>
+<section class="panel" id="p-wk3">
+<div class="pickblock p-max"><h3>Max <span class="tally">10 picks &middot; awaiting results</span></h3>
+<div class="tablewrap"><table><thead><tr><th>Game</th><th>Pick</th><th>Type</th><th>Result</th></tr></thead><tbody>
+<tr><td>Panthers @ Browns</td><td class="pick">Panthers -2.5</td><td><span class="type">ATS</span></td><td><span class="badge pending">&mdash;</span></td></tr>
+<tr><td>Bengals @ Steelers</td><td class="pick">Steelers ML (+3.5)</td><td><span class="type">ML</span></td><td><span class="badge pending">&mdash;</span></td></tr>
+<tr><td>Texans @ Colts</td><td class="pick">Texans -1.5</td><td><span class="type">ATS</span></td><td><span class="badge pending">&mdash;</span></td></tr>
+<tr><td>Jets @ Lions</td><td class="pick">Lions -6.5</td><td><span class="type">ATS</span></td><td><span class="badge pending">&mdash;</span></td></tr>
+<tr><td>Jets @ Lions</td><td class="pick">Under 48</td><td><span class="type">TOTAL</span></td><td><span class="badge pending">&mdash;</span></td></tr>
+<tr><td>Seahawks @ Commanders</td><td class="pick">Seahawks -7.5</td><td><span class="type">ATS</span></td><td><span class="badge pending">&mdash;</span></td></tr>
+<tr><td>Cardinals @ 49ers</td><td class="pick">Cardinals +8</td><td><span class="type">ATS</span></td><td><span class="badge pending">&mdash;</span></td></tr>
+<tr><td>Cowboys vs Ravens (Brazil)</td><td class="pick">Under 53.5</td><td><span class="type">TOTAL</span></td><td><span class="badge pending">&mdash;</span></td></tr>
+<tr><td>Raiders @ Saints</td><td class="pick">Raiders ML (+3)</td><td><span class="type">ML</span></td><td><span class="badge pending">&mdash;</span></td></tr>
+<tr><td>Eagles @ Bears</td><td class="pick">Eagles -5</td><td><span class="type">ATS</span></td><td><span class="badge pending">&mdash;</span></td></tr>
+</tbody></table></div>
+</div>
+<div class="pickblock p-mike"><h3>Michael <span class="tally">no picks</span></h3>
+</div>
+</section>
+<section class="panel" id="p-wk4">
+<div class="empty-note">No picks logged for Week 4 yet.</div>
+</section>
+<section class="panel" id="p-wk5">
+<div class="empty-note">No picks logged for Week 5 yet.</div>
+</section>
+<section class="panel" id="p-wk6">
+<div class="empty-note">No picks logged for Week 6 yet.</div>
+</section>
+<section class="panel" id="p-wk7">
+<div class="empty-note">No picks logged for Week 7 yet.</div>
+</section>
+<section class="panel" id="p-wk8">
+<div class="empty-note">No picks logged for Week 8 yet.</div>
+</section>
+<section class="panel" id="p-wk9">
+<div class="empty-note">No picks logged for Week 9 yet.</div>
+</section>
+<section class="panel" id="p-wk10">
+<div class="empty-note">No picks logged for Week 10 yet.</div>
+</section>
+<section class="panel" id="p-wk11">
+<div class="empty-note">No picks logged for Week 11 yet.</div>
+</section>
+<section class="panel" id="p-wk12">
+<div class="empty-note">No picks logged for Week 12 yet.</div>
+</section>
+<section class="panel" id="p-wk13">
+<div class="empty-note">No picks logged for Week 13 yet.</div>
+</section>
+<section class="panel" id="p-wk14">
+<div class="empty-note">No picks logged for Week 14 yet.</div>
+</section>
+<section class="panel" id="p-wk15">
+<div class="empty-note">No picks logged for Week 15 yet.</div>
+</section>
+<section class="panel" id="p-wk16">
+<div class="empty-note">No picks logged for Week 16 yet.</div>
+</section>
+<section class="panel" id="p-wk17">
+<div class="empty-note">No picks logged for Week 17 yet.</div>
+</section>
+<section class="panel" id="p-wk18">
+<div class="empty-note">No picks logged for Week 18 yet.</div>
+</section>
+  </main>
+
+  <p class="footnote">
+    <strong>Grading.</strong> Every pick is scored against the number as written at the time it was
+    made &mdash; lines are never restated to closing. Pushes are recorded but removed from the
+    denominator, so a 11&ndash;4&ndash;1 record scores 73.3%, not 68.8%. ATS, money line and totals
+    are kept apart as well as combined, since picking favorites straight up flatters a percentage
+    in a way spread picking does not.
+  </p>
+</div>
+</div>
+
+
+<script>
+  // soft guard: no unlock flag -> back to the PIN page. Fails open if JS is off.
+  try { if (sessionStorage.getItem("dit") !== "1") location.replace("index.html"); } catch (e) {}
+  var l = document.getElementById("lock");
+  if (l) l.addEventListener("click", function () {
+    try { sessionStorage.removeItem("dit"); } catch (e2) {}
+  });
+</script>
+</body>
+</html>
